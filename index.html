@@ -79,6 +79,22 @@
       font-weight: bold;
     }
 
+    .output-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .output-options label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: normal;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
     input[type="date"],
     select {
       padding: 8px;
@@ -88,10 +104,18 @@
     button {
       padding: 9px 18px;
       border: 1px solid #00bfae;
+      border-radius: 6px;
       background: white;
       color: #008f83;
       cursor: pointer;
       font-size: 14px;
+    }
+
+    .settings button {
+      padding: 14px 52px;
+      margin-left: 16px;
+      font-size: 16px;
+      font-weight: bold;
     }
 
     button:hover {
@@ -129,29 +153,39 @@
       gap: 10px;
     }
 
+    .buttons button {
+      padding: 14px 52px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
     .info {
       margin-top: 25px;
       padding: 15px;
       background: #f5f5f5;
       max-width: 700px;
+      box-sizing: border-box;
     }
 
     .info.intro {
       margin-top: 12px;
     }
 
+    .info.intro .note {
+      margin-top: 0;
+    }
+
+    #status {
+      min-height: 1.5em;
+      padding-top: 15px;
+    }
+
     .error {
       color: #d00;
-      margin-top: 15px;
     }
 
     .success {
       color: #1565c0;
-      margin-top: 15px;
-    }
-
-    .loading {
-      margin-top: 15px;
     }
 
     .debug {
@@ -207,6 +241,7 @@
       margin-bottom: 20px;
       padding: 15px;
       background: #f5f5f5;
+      box-sizing: border-box;
     }
 
     .time-settings {
@@ -252,6 +287,7 @@
       padding: 10px 15px;
       background: #f5f5f5;
       max-width: 700px;
+      box-sizing: border-box;
     }
 
     .small-buttons {
@@ -271,6 +307,13 @@
 
     @media screen and (max-width: 1000px) {
 
+/* 横スクロール防止(スクロール時のガタつき対策) */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 /* 全体の文字 */
 body {
   font-size: 18px;
@@ -287,12 +330,19 @@ body {
 }
 
 /* タイトル */
+.header {
+  display: block;
+  max-width: none;
+}
+
 .header h1 {
   font-size: 26px;
+  margin: 0 0 6px;
 }
 
 .account-info {
   font-size: 14px;
+  text-align: left;
 }
 
 /* 説明 */
@@ -336,12 +386,22 @@ body {
 input[type="date"] {
   display: block;
   width: 100%;
+  min-width: 0;
   max-width: none;
-  height: 52px;
-  padding: 8px 12px;
+  height: 48px;
+  padding: 0 12px;
+  line-height: 46px;
   box-sizing: border-box;
   font-size: 17px;
+  color: #333;
+  -webkit-text-fill-color: #333;
+  border: 1px solid #ccc;
   border-radius: 8px;
+  background: #fff;
+}
+
+.settings .field {
+  min-width: 0;
 }
 
 /* 予定を取得 */
@@ -349,6 +409,7 @@ input[type="date"] {
   width: 100%;
   max-width: none;
   height: 52px;
+  margin-left: 0;
   font-size: 17px;
   font-weight: bold;
   border-radius: 8px;
@@ -368,6 +429,9 @@ textarea {
   box-sizing: border-box;
   font-size: 17px;
   line-height: 1.7;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: #fff;
 }
 
 /* コピー・クリア */
@@ -381,6 +445,7 @@ textarea {
   flex: 1;
   height: 48px;
   font-size: 16px;
+  border-radius: 8px;
 }
 
 /* 判定条件・時間設定など */
@@ -407,6 +472,17 @@ textarea {
   min-height: 44px;
 }
 
+/* タップ領域確保 */
+.small-buttons button {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+/* 横はみ出し防止(スクロール時のガタつき対策) */
+.debug-toggle {
+  box-sizing: border-box;
+}
+
 }
 
 </style>
@@ -419,7 +495,7 @@ textarea {
 
     <div class="header">
 
-      <h1>⭐︎予定抽出</h1>
+      <h1>空き日抽出ツール</h1>
     
       <div class="account-info">
         ログイン中：<span id="currentUserEmail">確認中……</span>
@@ -433,24 +509,22 @@ textarea {
 
        <div class="info intro">
 
-        <strong>このツールについて</strong>
-    
         <div class="note">
-    
-          このツールは、Googleカレンダーのうち
-          あなたが所有しているカレンダーの予定を読み取り、
-          空き日を判定します。<br>
-    
-          予定の追加・変更・削除は行いません。<br>
-    
-          読み取った内容は、この画面での判定にのみ使います。<br>
-    
-          デバッグ表示をONにした場合のみ、
-          予定のタイトルと時刻が画面に表示されます。
-    
+
+          あなたが所有するGoogleカレンダーの予定を読み取り、予定が空いている日をテキストで出力するツールです。<br>
+
+          予定の追加・変更・削除は行わず、読み取った内容もこの画面での判定にのみ使用します。<br>
+
+          予定のタイトルや具体的な時刻が画面に表示されるのは、デバッグ表示をONにした場合のみです。
+
         </div>
-    
+
       </div>
+
+
+  <div id="status"></div>
+
+
   <!-- ======================================
        日付設定
        ====================================== -->
@@ -494,9 +568,6 @@ textarea {
   </div>
 
 
-  <div id="status"></div>
-
-
   <!-- ======================================
        結果
        ====================================== -->
@@ -505,9 +576,38 @@ textarea {
 
     <textarea
       id="result"
-      placeholder="ここに日程調整ツールへ貼り付ける日程が表示されます。"
-      readonly>
-    </textarea>
+      placeholder="ここに調整ツールへ貼り付ける日程が表示されます。"
+      readonly></textarea>
+
+
+    <div class="output-options">
+
+      <label>
+        <input
+          type="checkbox"
+          id="zeroPad"
+          checked
+          onchange="refreshOutputText()">
+        0埋めする
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          id="monthDayOnly"
+          onchange="refreshOutputText()">
+        月日のみ出力
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          id="includeTime"
+          onchange="refreshOutputText()">
+        時間表示を含める
+      </label>
+
+    </div>
 
 
     <div class="buttons">
@@ -572,13 +672,11 @@ textarea {
 
     <div class="note">
 
-      ※対象時間帯に重なっている予定のみ
-      判定に使用します。<br>
+      ※対象時間帯に重なっている予定のみ判定に使用します。<br>
 
       ※検索期間は最大180日です。<br>
 
-      ※長期間の検索による処理負荷を抑えるため、
-      180日を超える範囲は検索できません。
+      ※長期間の検索による処理負荷を抑えるため、180日を超える範囲は検索できません。
 
     </div>
 
@@ -662,9 +760,7 @@ textarea {
 
     <div class="note">
 
-      初期値：
-      昼 13:00〜18:00 ／
-      夜 21:00〜24:00
+      初期値：昼 13:00〜18:00／夜 21:00〜24:00
 
     </div>
 
@@ -720,11 +816,9 @@ textarea {
 
     <div class="note">
 
-      チェックしたカレンダーは
-      予定判定から除外されます。<br>
+      チェックしたカレンダーは予定判定から除外されます。<br>
 
-      表示されるのは、あなたが所有している
-      カレンダーのみです。
+      表示されるのは、あなたが所有しているカレンダーのみです。
 
     </div>
 
@@ -769,6 +863,43 @@ textarea {
 <script>
 
 /* ==========================================
+ * 画面上へのエラー表示(不具合調査用)
+ * ========================================== */
+
+window.addEventListener(
+  'error',
+  function(event) {
+
+    const status =
+      document.getElementById(
+        'status'
+      );
+
+
+    if (status) {
+
+      status.innerHTML +=
+        '<div class="error">' +
+        '画面エラー：' +
+        String(
+          event.message ||
+          event.error ||
+          event
+        ) +
+        '</div>';
+    }
+  }
+);
+
+
+/* ==========================================
+ * 直近の検索結果(出力形式の再生成用)
+ * ========================================== */
+
+let lastResultDates = [];
+
+
+/* ==========================================
  * 初期化
  * ========================================== */
 
@@ -778,62 +909,192 @@ window.addEventListener(
 );
 
 
+function reportInitError_(
+  label,
+  error
+) {
+
+  console.log(
+    label,
+    error
+  );
+
+
+  const status =
+    document.getElementById(
+      'status'
+    );
+
+
+  if (status) {
+
+    status.innerHTML +=
+      '<div class="error">' +
+      label +
+      '：' +
+      String(
+        (error && error.message) ||
+        error
+      ) +
+      '</div>';
+  }
+}
+
+
 function initialize() {
 
-  createTimeOptions();
+  try {
+
+    createTimeOptions();
+
+  } catch (error) {
+
+    reportInitError_(
+      '時間選択肢の作成に失敗しました。',
+      error
+    );
+  }
 
 
-  const today =
-    new Date();
+  try {
+
+    const today =
+      new Date();
 
 
-  const firstDay =
-    new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
+    const firstDay =
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+
+
+    const lastDay =
+      new Date(
+        today.getFullYear(),
+        today.getMonth() + 2,
+        0
+      );
+
+
+    document.getElementById(
+      'startDate'
+    ).value =
+      formatInputDate(
+        firstDay
+      );
+
+
+    document.getElementById(
+      'endDate'
+    ).value =
+      formatInputDate(
+        lastDay
+      );
+
+  } catch (error) {
+
+    reportInitError_(
+      '日付初期値の設定に失敗しました。',
+      error
+    );
+  }
+
+
+  try {
+
+    loadSettings();
+
+  } catch (error) {
+
+    reportInitError_(
+      '設定の読み込みに失敗しました。',
+      error
+    );
+  }
+
+
+  try {
+
+    loadCalendars();
+
+  } catch (error) {
+
+    reportInitError_(
+      'カレンダー一覧の読み込みに失敗しました。',
+      error
+    );
+  }
+
+
+  try {
+
+    let emailResolved =
+      false;
+
+
+    google.script.run
+    .withSuccessHandler(function(email) {
+
+      emailResolved =
+        true;
+
+      document.getElementById(
+        'currentUserEmail'
+      ).textContent =
+        email || '取得できません';
+
+    })
+    .withFailureHandler(function(error) {
+
+      emailResolved =
+        true;
+
+      document.getElementById(
+        'currentUserEmail'
+      ).textContent =
+        '取得できません';
+
+      reportInitError_(
+        'ログインメール取得に失敗しました。',
+        error
+      );
+
+    })
+    .getCurrentUserEmail();
+
+
+    /*
+     * 応答がないまま固まるのを防ぐための
+     * タイムアウト処理
+     */
+    setTimeout(
+      function() {
+
+        if (!emailResolved) {
+
+          document.getElementById(
+            'currentUserEmail'
+          ).textContent =
+            '取得できません(タイムアウト)';
+        }
+      },
+      8000
     );
 
-
-  const lastDay =
-    new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0
-    );
-
-
-  document.getElementById(
-    'startDate'
-  ).value =
-    formatInputDate(
-      firstDay
-    );
-
-
-  document.getElementById(
-    'endDate'
-  ).value =
-    formatInputDate(
-      lastDay
-    );
-
-
-  loadSettings();
-
-  loadCalendars();
-
-  google.script.run
-  .withSuccessHandler(function(email) {
+  } catch (error) {
 
     document.getElementById(
       'currentUserEmail'
     ).textContent =
-      email || '取得できません';
+      '取得できません';
 
-  })
-  .getCurrentUserEmail();
-
+    reportInitError_(
+      'ログインメール取得の呼び出しに失敗しました。',
+      error
+    );
+  }
 }
 
 
@@ -1548,10 +1809,12 @@ function displayResult(
     '</div>';
 
 
-  document.getElementById(
-    'result'
-  ).value =
-    data.output;
+  lastResultDates =
+    data.dates ||
+    [];
+
+
+  refreshOutputText();
 
 
   const debugEnabled =
@@ -1572,6 +1835,94 @@ function displayResult(
       'debugArea'
     ).innerHTML = '';
   }
+}
+
+
+/* ==========================================
+ * 出力テキスト生成
+ * ========================================== */
+
+function buildOutputText(
+  dates
+) {
+
+  const includeTime =
+    document.getElementById(
+      'includeTime'
+    ).checked;
+
+  const zeroPad =
+    document.getElementById(
+      'zeroPad'
+    ).checked;
+
+  const monthDayOnly =
+    document.getElementById(
+      'monthDayOnly'
+    ).checked;
+
+
+  return dates
+    .map(
+      item => {
+
+        const month =
+          zeroPad
+            ? String(
+                item.month
+              ).padStart(2, '0')
+            : String(
+                item.month
+              );
+
+        const day =
+          zeroPad
+            ? String(
+                item.day
+              ).padStart(2, '0')
+            : String(
+                item.day
+              );
+
+        const datePart =
+          monthDayOnly
+            ? `${month}/${day}`
+            : `${item.year}/${month}/${day}`;
+
+
+        let line =
+          `${datePart}(${item.weekday})`;
+
+
+        if (
+          includeTime &&
+          item.startTime
+        ) {
+
+          line +=
+            ` ${item.startTime}〜`;
+        }
+
+
+        return line;
+      }
+    )
+    .join('\n');
+}
+
+
+/* ==========================================
+ * 出力テキスト再生成
+ * ========================================== */
+
+function refreshOutputText() {
+
+  document.getElementById(
+    'result'
+  ).value =
+    buildOutputText(
+      lastResultDates
+    );
 }
 
 
@@ -1951,16 +2302,31 @@ function displayError(
   error
 ) {
 
-  document.getElementById(
-    'status'
-  ).innerHTML =
-    '<div class="error">' +
+  const statusEl =
+    document.getElementById(
+      'status'
+    );
+
+  statusEl.innerHTML = '';
+
+  const errorDiv =
+    document.createElement(
+      'div'
+    );
+
+  errorDiv.className =
+    'error';
+
+  errorDiv.textContent =
     'エラー：' +
-    escapeHtml(
-      error.message ||
+    (
+      (error && error.message) ||
       String(error)
-    ) +
-    '</div>';
+    );
+
+  statusEl.appendChild(
+    errorDiv
+  );
 
 
   if (
@@ -2004,7 +2370,9 @@ async function copyResult() {
     document.getElementById(
       'status'
     ).innerHTML =
-      'コピーしました。';
+      '<div class="success">' +
+      'コピーしました。' +
+      '</div>';
 
 
   } catch (error) {
@@ -2021,7 +2389,9 @@ async function copyResult() {
     document.getElementById(
       'status'
     ).innerHTML =
-      'コピーしました。';
+      '<div class="success">' +
+      'コピーしました。' +
+      '</div>';
   }
 }
 
@@ -2031,6 +2401,9 @@ async function copyResult() {
  * ========================================== */
 
 function clearResult() {
+
+  lastResultDates = [];
+
 
   document.getElementById(
     'result'

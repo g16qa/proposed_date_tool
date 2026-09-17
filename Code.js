@@ -43,7 +43,8 @@ function doGet() {
 
   return HtmlService
     .createHtmlOutputFromFile('index')
-    .setTitle('予定抽出');
+    .setTitle('予定抽出')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
 }
 
 
@@ -302,7 +303,25 @@ function getProposedDates(
           getWeekday_(currentDate),
 
         reason:
-          result.reason
+          result.reason,
+
+        year:
+          currentDate.getFullYear(),
+
+        month:
+          currentDate.getMonth() + 1,
+
+        day:
+          currentDate.getDate(),
+
+        startTime:
+          getAvailableStartTime_(
+            result,
+            dayStartStr,
+            nightStartStr,
+            dayStart,
+            nightStart
+          )
 
       });
     }
@@ -929,6 +948,58 @@ function getReason_(
 
 
 /* ==========================================
+ * 空いている時間帯の開始時刻
+ * ========================================== */
+
+/**
+ * 昼・夜のうち空いている方の開始時刻を返す。
+ *
+ * 両方空いている場合は、より早い方の開始時刻を返す。
+ */
+function getAvailableStartTime_(
+  result,
+  dayStartStr,
+  nightStartStr,
+  dayStartTime,
+  nightStartTime
+) {
+
+  const dayFree =
+    !result.hasDaytimeEvent;
+
+  const nightFree =
+    !result.hasNighttimeEvent;
+
+
+  if (
+    dayFree &&
+    nightFree
+  ) {
+
+    return (
+      timeToMinutes_(dayStartTime) <=
+      timeToMinutes_(nightStartTime)
+    )
+      ? dayStartStr
+      : nightStartStr;
+  }
+
+
+  if (dayFree) {
+    return dayStartStr;
+  }
+
+
+  if (nightFree) {
+    return nightStartStr;
+  }
+
+
+  return null;
+}
+
+
+/* ==========================================
  * 時刻
  * ========================================== */
 
@@ -1134,5 +1205,17 @@ function getWeekday_(
 }
 
 function getCurrentUserEmail() {
-  return Session.getActiveUser().getEmail();
+
+  try {
+
+    return (
+      Session.getActiveUser().getEmail() ||
+      Session.getEffectiveUser().getEmail() ||
+      ''
+    );
+
+  } catch (error) {
+
+    return '';
+  }
 }
