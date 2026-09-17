@@ -1,20 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
-
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+  <base target="_top">
 
   <style>
 
     body {
       font-family: Arial, sans-serif;
-      margin: 30px;
+      margin: 0;
       color: #333;
     }
 
+    .container {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 30px;
+      box-sizing: border-box;
+    }
+
+    .header,
+    .settings,
+    .result-area,
+    .info,
+    .setting-section,
+    .debug-toggle {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      max-width: 700px;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      margin: 0;
+    }
+
+    .account-info {
+      font-size: 13px;
+      color: #666;
+      text-align: right;
+    }
+
     h1 {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     h2 {
@@ -26,6 +65,7 @@
       gap: 20px;
       align-items: end;
       flex-wrap: wrap;
+      margin-top: 20px;
       margin-bottom: 20px;
     }
 
@@ -96,18 +136,22 @@
       max-width: 700px;
     }
 
+    .info.intro {
+      margin-top: 12px;
+    }
+
     .error {
       color: #d00;
       margin-top: 15px;
     }
 
-    .loading {
+    .success {
+      color: #1565c0;
       margin-top: 15px;
     }
 
-    .count {
-      margin-bottom: 8px;
-      font-weight: bold;
+    .loading {
+      margin-top: 15px;
     }
 
     .debug {
@@ -225,15 +269,188 @@
       font-size: 13px;
     }
 
-  </style>
+    @media screen and (max-width: 1000px) {
+
+/* 全体の文字 */
+body {
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ページ幅 */
+.container {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 16px 12px;
+  box-sizing: border-box;
+}
+
+/* タイトル */
+.header h1 {
+  font-size: 26px;
+}
+
+.account-info {
+  font-size: 14px;
+}
+
+/* 説明 */
+.info {
+  width: 100%;
+  max-width: none;
+  font-size: 17px;
+  line-height: 1.7;
+  box-sizing: border-box;
+}
+
+.info h2,
+.info h3 {
+  font-size: 21px;
+}
+
+/* 検索エリア */
+.settings {
+  width: 100%;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.settings .field {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.settings label {
+  display: block;
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+/* 日付入力 */
+input[type="date"] {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: 52px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  font-size: 17px;
+  border-radius: 8px;
+}
+
+/* 予定を取得 */
+.settings button {
+  width: 100%;
+  max-width: none;
+  height: 52px;
+  font-size: 17px;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+/* 結果 */
+.result-area {
+  width: 100%;
+  max-width: none;
+}
+
+textarea {
+  width: 100%;
+  max-width: none;
+  height: 180px;
+  padding: 12px;
+  box-sizing: border-box;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* コピー・クリア */
+.buttons {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+.buttons button {
+  flex: 1;
+  height: 48px;
+  font-size: 16px;
+}
+
+/* 判定条件・時間設定など */
+.setting-section {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.setting-section h2,
+.setting-section h3 {
+  font-size: 21px;
+}
+
+/* 時刻セレクト */
+.time-settings {
+  width: 100%;
+}
+
+.time-group select {
+  font-size: 17px;
+  min-height: 44px;
+}
+
+}
+
+</style>
 </head>
 
 
 <body>
 
-  <h1>デイコード予定抽出</h1>
+  <div class="container">
 
+    <div class="header">
 
+      <h1>⭐︎予定抽出</h1>
+    
+      <div class="account-info">
+        ログイン中：<span id="currentUserEmail">確認中……</span>
+      </div>
+    
+    </div>
+
+    <!-- ======================================
+       カレンダーの利用について
+       ====================================== -->
+
+       <div class="info intro">
+
+        <strong>このツールについて</strong>
+    
+        <div class="note">
+    
+          このツールは、Googleカレンダーのうち
+          あなたが所有しているカレンダーの予定を読み取り、
+          空き日を判定します。<br>
+    
+          予定の追加・変更・削除は行いません。<br>
+    
+          読み取った内容は、この画面での判定にのみ使います。<br>
+    
+          デバッグ表示をONにした場合のみ、
+          予定のタイトルと時刻が画面に表示されます。
+    
+        </div>
+    
+      </div>
   <!-- ======================================
        日付設定
        ====================================== -->
@@ -286,15 +503,9 @@
 
   <div class="result-area">
 
-    <div
-      id="count"
-      class="count">
-    </div>
-
-
     <textarea
       id="result"
-      placeholder="ここにデイコードへ貼り付ける日程が表示されます。"
+      placeholder="ここに日程調整ツールへ貼り付ける日程が表示されます。"
       readonly>
     </textarea>
 
@@ -372,7 +583,6 @@
     </div>
 
   </div>
-
 
   <!-- ======================================
        時間設定
@@ -612,6 +822,18 @@ function initialize() {
   loadSettings();
 
   loadCalendars();
+
+  google.script.run
+  .withSuccessHandler(function(email) {
+
+    document.getElementById(
+      'currentUserEmail'
+    ).textContent =
+      email || '取得できません';
+
+  })
+  .getCurrentUserEmail();
+
 }
 
 
@@ -737,7 +959,7 @@ function loadSettings() {
 
   const saved =
     localStorage.getItem(
-      'daycodeSettings'
+      'proposedDateSettings'
     );
 
 
@@ -868,7 +1090,7 @@ function saveSettings() {
 
 
   localStorage.setItem(
-    'daycodeSettings',
+    'proposedDateSettings',
     JSON.stringify(settings)
   );
 }
@@ -938,7 +1160,7 @@ function displayCalendars(
 
   const saved =
     localStorage.getItem(
-      'daycodeSettings'
+      'proposedDateSettings'
     );
 
 
@@ -1239,11 +1461,6 @@ function searchDates() {
     '</div>';
 
 
-  document.getElementById(
-    'count'
-  ).textContent = '';
-
-
   const debugEnabled =
     document.getElementById(
       'debugEnabled'
@@ -1269,7 +1486,7 @@ function searchDates() {
       displayError
     )
 
-    .getDaycodeDates(
+    .getProposedDates(
 
       startDate,
 
@@ -1326,19 +1543,15 @@ function displayResult(
   document.getElementById(
     'status'
   ).innerHTML =
-    '取得完了';
+    '<div class="success">' +
+    '取得完了' +
+    '</div>';
 
 
   document.getElementById(
     'result'
   ).value =
     data.output;
-
-
-  document.getElementById(
-    'count'
-  ).textContent =
-    `${data.dates.length}日`;
 
 
   const debugEnabled =
@@ -1825,11 +2038,6 @@ function clearResult() {
 
 
   document.getElementById(
-    'count'
-  ).textContent = '';
-
-
-  document.getElementById(
     'status'
   ).innerHTML = '';
 
@@ -1932,6 +2140,8 @@ function escapeHtml(
 }
 
 </script>
+
+  </div>
 
 </body>
 </html>

@@ -1,10 +1,10 @@
 /**
  * ==========================================
- * Daycode 予定抽出
+ * 予定抽出
  * ==========================================
  *
  * 昼または夜のどちらか一方でも空いている日を
- * Daycode用の日付として出力します。
+ * 日程調整用の日付として出力します。
  *
  * ・昼：13:00〜18:00
  * ・夜：21:00〜24:00
@@ -43,7 +43,7 @@ function doGet() {
 
   return HtmlService
     .createHtmlOutputFromFile('index')
-    .setTitle('デイコード予定抽出');
+    .setTitle('予定抽出');
 }
 
 
@@ -123,11 +123,11 @@ function getTargetCalendars_(
 
 
 /* ==========================================
- * Daycode用日付取得
+ * 対象日付取得
  * ========================================== */
 
 /**
- * Daycode用の日付を取得。
+ * 出力対象の日付を取得。
  *
  * 昼または夜のどちらか一方でも空いていれば対象。
  *
@@ -139,7 +139,7 @@ function getTargetCalendars_(
  * @param {string} nightEndStr HH:mm
  * @param {string[]} excludedCalendarIds
  */
-function getDaycodeDates(
+function getProposedDates(
   startDateStr,
   endDateStr,
   dayStartStr,
@@ -286,7 +286,7 @@ function getDaycodeDates(
 
 
     /* ----------------------------------------
-     * Daycode出力対象
+     * 出力対象
      * ---------------------------------------- */
 
     if (
@@ -1131,4 +1131,8 @@ function getWeekday_(
   return weekdays[
     date.getDay()
   ];
+}
+
+function getCurrentUserEmail() {
+  return Session.getActiveUser().getEmail();
 }
