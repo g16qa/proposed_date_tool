@@ -1,0 +1,5 @@
+# GAS版だけをclaspの対象にする（web/ などをGASへ送らない）
+**/**
+!Code.js
+!index.html
+!appsscript.json
